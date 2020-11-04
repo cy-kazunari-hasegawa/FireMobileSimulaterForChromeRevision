@@ -148,6 +148,16 @@ fms.core.deleteLimitHost = function (deletedId) {
     fms.pref.deletePref(sPrefKey);
   }
   fms.pref.setPref("msim.limitHost.count", count-1);
+  // タブ毎の設定も移動させる
+  for (let index = 0; index < chrome.tabs.length; index++) {
+    const tab = chrome.tabs[index];
+    let id = fms.core.getTabPref(tab.id);
+    if (id > deletedId) {
+      fms.core.setTabPref(tab.id, id - 1);
+    }else if (id == deletedId) {
+      fms.core.resetTabPref(tab.id);
+    }
+  }
 };
 
 fms.core.updateIcon = function () {
