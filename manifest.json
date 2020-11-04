@@ -1,9 +1,10 @@
 {
   "manifest_version": 2,
   "background": {
-    "scripts": ["js/jquery-1.7.1.min.js", "js/pref.js", "js/carrier.js",  "js/util.js", "js/core.js", "js/webRequestHandler.js", "js/initialData.js", "background.js"]
+    "persistent": false,
+    "scripts": ["js/jquery-3.5.1.min.js", "js/pref.js", "js/carrier.js",  "js/util.js", "js/core.js", "js/webRequestHandler.js", "js/initialData.js", "background.js"]
   },
-  "browser_action": {
+  "page_action": {
     "default_icon": "ua-disabled.png",
     "default_popup": "ua.html"
   },
@@ -16,7 +17,7 @@
   "minimum_chrome_version": "17.0.963.12",
   "name": "__MSG_appName__",
   "options_page": "options.html",
-  "permissions": [ "tabs", "background", "webRequest", "webRequestBlocking", "*://*/*" ],
+  "permissions": [ "tabs", "activeTab", "background", "webRequest", "webRequestBlocking", "*://*/*" ],
   "content_scripts": [
    {
     "matches": ["*://*/*"],
@@ -24,7 +25,7 @@
    }
   ],
   "content_security_policy": "script-src 'self' https://ssl.google-analytics.com 'unsafe-eval'; object-src 'self'",
-  "version": "1.0.3",
+  "version": "1.0.0",
   "web_accessible_resources": [
     "emoji/e/1.gif",
     "emoji/e/10.gif",

@@ -28,6 +28,10 @@ fms.core.resetDevice = function (e) {
     fms.pref.deletePref("msim.current.carrier");
     fms.pref.deletePref("msim.current.id");
     fms.core.updateIcon();
+    for (let index = 0; index < chrome.tabs.length; index++) {
+      const tab = chrome.tabs[index];
+      fms.core.resetTabPref(tab.id);
+    }
   }
 };
 
@@ -39,6 +43,7 @@ fms.core.setDevice = function (id) {
     console.log("[msim]Error : the attribute which you have selected is insufficient.\n");
     return;
   }
+  var tabId = chrome.tabs.getCurrent().id;
 
   var tabselect_enabled = fms.pref.getPref("msim.config.tabselect.enabled");
   if (tabselect_enabled) {
@@ -46,7 +51,8 @@ fms.core.setDevice = function (id) {
   } else {
     var pref_prefix = "msim.devicelist." + id;
     var carrier = fms.pref.getPref(pref_prefix + ".carrier");
-    fms.pref.setPref("msim.current.id", id);
+    fms.core.setTabPref(tabId, id);
+    //fms.pref.setPref("msim.current.id", id);
     fms.core.updateIcon();
   }
 };
@@ -64,7 +70,7 @@ fms.core.deleteDevice = function (deletedId) {
   //ホストの端末指定も削除する
   fms.core.deleteLimitHostDeviceByDeviceId(deletedDeviceId);
 
-  //各端末のidを再計算
+  // 各端末のidを再計算
   var count = fms.pref.getPref("msim.devicelist.count");
   for (var i=deletedId+1; i<=count; i++) {
     var sPrefPrefix = "msim.devicelist." + i + ".";
@@ -104,6 +110,15 @@ fms.core.deleteDevice = function (deletedId) {
     } else if (id == deletedId) {
       fms.core.resetDevice();
     }
+    for (let index = 0; index < chrome.tabs.length; index++) {
+      const tab = chrome.tabs[index];
+      id = fms.core.getTabPref(tab.id);
+      if (id > deletedId) {
+        fms.core.setTabPref(tab.id, id-1);
+      } else if (id == deletedId) {
+        fms.core.resetTabPref(tab.id);
+      }
+      }
   }
 };
 
@@ -112,11 +127,11 @@ fms.core.deleteLimitHost = function (deletedId) {
   var prefKey = "msim.limitHost." + deletedId + ".value";
   fms.pref.deletePref(prefKey);
 
-  //ホスト制限に指定している端末IDも削除する
+  ///ホスト制限に指定している端末IDも削除する
   var prefKey = "msim.limitHost." + deletedId + ".device-id";
   fms.pref.deletePref(prefKey);
 
-  //idを再計算
+  // idを再計算
   var count = fms.pref.getPref("msim.limitHost.count");
   for (var i=deletedId+1; i<=count; i++) {
     var sPrefKey = "msim.limitHost." + i + ".value";
@@ -136,11 +151,13 @@ fms.core.deleteLimitHost = function (deletedId) {
 };
 
 fms.core.updateIcon = function () {
-  var id = fms.pref.getPref("msim.current.id");
+  //var id = fms.pref.getPref("msim.current.id");
+  var tabId = chrome.tabs.getCurrent().id;
+  var id = fms.core.getTabPref(tabId);
   if (id) {
-    chrome.browserAction.setIcon({path:'ua.png'});
+    chrome.pageAction.setIcon({tabId: tabId, path:'ua.png'});
   } else {
-    chrome.browserAction.setIcon({path:'ua-disabled.png'});
+    chrome.pageAction.setIcon({tabId: tabId, path:'ua-disabled.png'});
   }
 };
 
@@ -314,7 +331,7 @@ fms.core.isSimulate = function (hostName) {
   return isSimulate;
 }
 
-//msim.devicelist.X.device-idが一致するデバイスを返す
+///msim.devicelist.X.device-idが一致するデバイスを返す
 fms.core.getDeviceByDeviceId = function (deviceId){
   var deviceCount = fms.pref.getPref("msim.devicelist.count");
   var deviceIndex = -1;
@@ -368,4 +385,28 @@ fms.core.deleteLimitHostDeviceByDeviceId = function (deviceId) {
       fms.pref.setPref("msim.limitHost." + i + ".device-id", "-1");
     }
   }
+}
+
+fms.core.getTabPref = function(tabId){
+  if (!fms.core.tabPref) {
+    fms.core.tabPref = {};
+  }
+  if (fms.core.tabPref[tabId]) {
+    return fms.core.tabPref[tabId];
+  }
+  return false;
+}
+
+fms.core.setTabPref = function(tabId, id){
+  if (!fms.core.tabPref) {
+    fms.core.tabPref = {};
+  }
+  fms.core.tabPref[tabId] = id;
+}
+
+fms.core.resetTabPref = function(tabId){
+  if (!fms.core.tabPref) {
+    fms.core.tabPref = {};
+  }
+  delete fms.core.tabPref[tabId];
 }

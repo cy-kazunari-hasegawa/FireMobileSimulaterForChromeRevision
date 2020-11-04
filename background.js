@@ -47,7 +47,6 @@
   });
 
   var dolog = true;
-  var uaPerTab = new Array();
   var opt_filter = { urls:["*://*/*"] };
   var blockingInfoSpec = ["requestHeaders", "blocking"];
   var activeTabId;
@@ -57,14 +56,16 @@
       console.log("(tabIsActive) tab is active:tabId" + tabId + " with selectInfo:" + selectInfo);
     }
     activeTabId = tabId;
-    var id = fms.pref.getPref("msim.current.id");
-    //var uaOfTab = uaPerTab[tabId];
+    //var id = fms.pref.getPref("msim.current.id");
+    var id = fms.core.getTabPref(tabId);
     if (id) {
-      chrome.browserAction.setIcon({path:'ua.png'});
+      //chrome.browserAction.setIcon({path:'ua.png'});
       //changeUserAgent(uaOfTab);
+      chrome.pageAction.setIcon({tabId: tabId, path:'ua.png'});
     } else {
-      chrome.browserAction.setIcon({path:'ua-disabled.png'});
+      //chrome.browserAction.setIcon({path:'ua-disabled.png'});
       //changeUserAgent(originalUa);
+      chrome.pageAction.setIcon({tabId: tabId, path:'ua-disabled.png'});
     }
   }
   chrome.tabs.onActiveChanged.addListener(tabIsActive);

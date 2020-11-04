@@ -89,7 +89,8 @@ fms.overlay.displayDeviceSwitcherMenu = function (menu, suffix) {
   if (tabselect_enabled) {
     // TODO tab specific setting
   } else {
-    currentId = fms.pref.getPref("msim.current.id");
+    //currentId = fms.pref.getPref("msim.current.id");
+    currentId = fms.core.getTabPref(chrome.tabs.getCurrent().id);
   }
 
   if (currentId) {
