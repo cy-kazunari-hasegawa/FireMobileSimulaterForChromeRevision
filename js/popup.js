@@ -90,17 +90,17 @@ fms.overlay.displayDeviceSwitcherMenu = function (menu, suffix) {
     // TODO tab specific setting
   } else {
     //currentId = fms.pref.getPref("msim.current.id");
-    currentId = fms.core.getTabPref(chrome.tabs.getCurrent().id);
   }
-
-  if (currentId) {
-    currentMenu = $("#msim-device-" + suffix + "-" + currentId);
-  }
-  if (!currentMenu) {
-    currentMenu = $("#device-default");
-  }
-  currentMenu.addClass("selected");
-
+  chrome.tabs.query({ currentWindow:true, active:true}, function(tabs){
+    currentId = fms.core.getTabPref(tabs[0].id);
+    if (currentId) {
+      currentMenu = $("#msim-device-" + suffix + "-" + currentId);
+    }
+    if (!currentMenu) {
+      currentMenu = $("#device-default");
+    }
+    currentMenu.addClass("selected");
+  });
 };
 
 /**

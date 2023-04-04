@@ -43,17 +43,20 @@ fms.core.setDevice = function (id) {
     console.log("[msim]Error : the attribute which you have selected is insufficient.\n");
     return;
   }
-  var tabId = chrome.tabs.getCurrent().id;
 
   var tabselect_enabled = fms.pref.getPref("msim.config.tabselect.enabled");
   if (tabselect_enabled) {
     // TODO tab specific setting
   } else {
-    var pref_prefix = "msim.devicelist." + id;
-    var carrier = fms.pref.getPref(pref_prefix + ".carrier");
-    fms.core.setTabPref(tabId, id);
-    //fms.pref.setPref("msim.current.id", id);
-    fms.core.updateIcon();
+    chrome.tabs.query({ currentWindow:true, active:true}, function(tabs){
+      var tabId = tabs[0].id;
+
+      var pref_prefix = "msim.devicelist." + id;
+      var carrier = fms.pref.getPref(pref_prefix + ".carrier");
+      fms.core.setTabPref(tabId, id);
+      //fms.pref.setPref("msim.current.id", id);
+      fms.core.updateIcon();
+      });
   }
 };
 
@@ -162,13 +165,15 @@ fms.core.deleteLimitHost = function (deletedId) {
 
 fms.core.updateIcon = function () {
   //var id = fms.pref.getPref("msim.current.id");
-  var tabId = chrome.tabs.getCurrent().id;
-  var id = fms.core.getTabPref(tabId);
-  if (id) {
-    chrome.pageAction.setIcon({tabId: tabId, path:'ua.png'});
-  } else {
-    chrome.pageAction.setIcon({tabId: tabId, path:'ua-disabled.png'});
-  }
+  chrome.tabs.query({ currentWindow:true, active:true}, function(tabs){
+    var tabId = tabs[0].id;
+    var id = fms.core.getTabPref(tabId);
+    if (id) {
+      chrome.pageAction.setIcon({tabId: tabId, path:'ua.png'});
+    } else {
+      chrome.pageAction.setIcon({tabId: tabId, path:'ua-disabled.png'});
+    }
+  });
 };
 
 fms.core.parseDeviceListXML = function (filePath, postData) {

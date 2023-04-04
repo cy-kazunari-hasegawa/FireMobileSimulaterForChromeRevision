@@ -5,7 +5,7 @@ if (!fms.options) fms.options = {};
 fms.options.initializeDevices = function () {
   $(".device-row").remove();
   var deviceCount = fms.pref.getIntPref("msim.devicelist.count");
-  var listSize = Math.min(20, 3 + parseInt(deviceCount));
+  var listSize = Math.min(20, 3 + parseInt(deviceCount, 10));
   var carrier;
   var device;
   for (var i = 1; i <= deviceCount; i++) {
@@ -23,6 +23,13 @@ fms.options.initializeDevices = function () {
           .click(function () {
             fms.options.editDevice(id)
           });
+        var copy = $("<button>")
+          .addClass("button-in-cell")
+          .addClass("btn")
+          .text(chrome.i18n.getMessage("options_copy"))
+          .click(function(){
+            fms.options.copyDevice(id)
+          });
         var del = $("<button>")
           .addClass("button-in-cell")
           .addClass("btn")
@@ -35,6 +42,7 @@ fms.options.initializeDevices = function () {
           });
         tr.append($("<td>").text(carrier + " " + device))
           .append($("<td>").addClass("button-cell").append(edit))
+          .append($("<td>").addClass("button-cell").append(copy))
           .append($("<td>").addClass("button-cell").append(del));
         $("#msim-listbox").append(tr);
       })();
@@ -128,6 +136,58 @@ fms.options.editDevice = function (id) {
   $("#modal_device_form_header").text(chrome.i18n.getMessage("edit_device_header"));
   $("#modal_device_form").modal("show");
 
+};
+fms.options.copyDevice = function (id) {
+  var saveId;
+  var sourceDevicePrefix = "msim.devicelist." + id;
+
+  console.log(fms.pref.getIntPref("msim.devicelist.count"));
+  saveId = fms.pref.getIntPref("msim.devicelist.count") + 1;
+
+  var carrier = fms.pref.getPref(sourceDevicePrefix + ".carrier");
+  var deviceName = fms.pref.getPref(sourceDevicePrefix + ".label") + " Copy";
+  var userAgent = fms.pref.getPref(sourceDevicePrefix + ".useragent");
+  var type1 = fms.pref.getPref(sourceDevicePrefix + ".type1");
+  var screenWidth = fms.pref.getPref(sourceDevicePrefix + ".screen-width");
+  var screenHeight = fms.pref.getPref(sourceDevicePrefix + ".screen-height");
+  var useCookie = fms.pref.getPref(sourceDevicePrefix + ".use-cookie");
+
+  // input check
+  if (!deviceName || !carrier || !userAgent) {
+    console.log("Warning : Required data is null.");
+    alert(chrome.i18n.getMessage("required_field_is_blank"));
+    return false;
+  }
+
+  fms.pref.setPref("msim.devicelist.count", saveId);
+  fms.pref.setPref("msim.devicelist." + saveId + ".carrier", carrier);
+
+  console.log("save-carrier:" + carrier);
+  console.log("save-id:" + saveId);
+
+  fms.pref.setPref("msim.devicelist." + saveId + ".label", deviceName);
+  fms.pref.setPref("msim.devicelist." + saveId + ".carrier", carrier);
+  fms.pref.setPref("msim.devicelist." + saveId + ".useragent", userAgent);
+  fms.pref.setPref("msim.devicelist." + saveId + ".type1", type1);
+  fms.pref.setPref("msim.devicelist." + saveId + ".screen-width", screenWidth);
+  fms.pref.setPref("msim.devicelist." + saveId + ".screen-height", screenHeight);
+  fms.pref.setPref("msim.devicelist." + saveId + ".use-cookie", useCookie);
+
+  // copy extra headers
+  var extraHeaderCount = fms.pref.getIntPref(sourceDevicePrefix + ".extra-header.count");
+  for (var i = 0; i < extraHeaderCount; i++) {
+    var name = fms.pref.getPref(sourceDevicePrefix + ".extra-header." + i + ".name");
+    var value = fms.pref.getPref(sourceDevicePrefix + ".extra-header." + i + ".value");
+
+    fms.pref.setPref("msim.devicelist." + saveId + ".extra-header." + i + ".name", name);
+    fms.pref.setPref("msim.devicelist." + saveId + ".extra-header." + i + ".value", value);
+  }
+  fms.pref.setPref("msim.devicelist." + saveId + ".extra-header.count", extraHeaderCount);
+  
+  confirm(chrome.i18n.getMessage("save_complete"));
+  
+  fms.options.initializeDevices();
+  fms.options.addDevice();
 };
 
 fms.options.clearAllDeviceSettings = function() {

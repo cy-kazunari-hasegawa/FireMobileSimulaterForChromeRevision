@@ -32,6 +32,9 @@
   "options_edit": {
     "message": "edit"
   },
+  "options_copy": {
+    "message": "copy"
+  },
   "options_delete": {
     "message": "delete"
   },

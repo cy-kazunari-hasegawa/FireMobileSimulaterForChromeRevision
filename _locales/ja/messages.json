@@ -29,6 +29,9 @@
   "options_add": {
     "message": "追加する"
   },
+  "options_copy": {
+    "message": "コピーする"
+  },
   "options_edit": {
     "message": "編集する"
   },

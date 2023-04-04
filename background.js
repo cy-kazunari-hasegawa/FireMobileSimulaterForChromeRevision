@@ -85,7 +85,11 @@ var server = {
     if (tabselect_enabled) {
       // TODO get carrier and id for this tab
     } else {
-      id = fms.pref.getPref("msim.current.id");
+      if (typeof request.devieceid != "undefined") {
+        id = request.deviceid;
+      }else{
+        id = fms.pref.getPref("msim.current.id");
+      }
       carrier = fms.pref.getPref("msim.devicelist." + id + ".carrier");
       width = fms.pref.getPref("msim.devicelist." + id + ".screen-width")
                   || fms.pref.getPref("msim.config.general.screen-width-default");
